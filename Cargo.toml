@@ -1,0 +1,8 @@
+[package]
+name = "vysx_std"
+version = "0.1.0"
+edition = "2024"
+license = "Apache-2.0"
+readme = "README.md"
+description = "vysx standard library, a set of utilities that default rust std does not have."
+repository = "https://github.com/opkvysxct/vysx_std"
