@@ -21,7 +21,7 @@ impl ReasonToAny {
 		self.any_reason += 1;
 	}
 	pub fn remove_any_reason(&mut self) {
-		if self.any_reason > 0 {
+		if self.any_reason.is_positive() {
 			self.any_reason -= 1;
 		}
 	}
@@ -38,10 +38,10 @@ impl<T: PartialEq> ReasonToUnique<T> {
 		self.unique_reason.push(unique_reason);
 	}
 	pub fn remove_unique_reason(&mut self, unique_reason: T) {
-		self.unique_reason.remove(
+		self.unique_reason.swap_remove(
 			self.unique_reason
 				.iter()
-				.position(|v| v == &unique_reason)
+				.position(|reason| reason == &unique_reason)
 				.unwrap(),
 		);
 	}
