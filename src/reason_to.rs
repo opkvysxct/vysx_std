@@ -1,67 +1,68 @@
-use std::vec;
-
 #[derive(Default)]
 pub struct ReasonToAny {
-	any_reason: i32,
+	count: u32,
 }
 
 #[derive(Default)]
-pub struct ReasonToUnique<T: PartialEq> {
-	unique_reason: vec::Vec<T>,
+pub struct ReasonToUnique<T> {
+	reasons: Vec<T>,
 }
 
 #[derive(Default)]
-pub struct ReasonToFull<T: PartialEq> {
-	pub reason_to_any: ReasonToAny,
-	pub reason_to_unique: ReasonToUnique<T>,
+pub struct ReasonToFull<T> {
+	pub any: ReasonToAny,
+	pub unique: ReasonToUnique<T>,
 }
 
 impl ReasonToAny {
-	pub fn add_any_reason(&mut self) {
-		self.any_reason += 1;
+	pub fn add(&mut self) {
+		self.count += 1;
 	}
-	pub fn remove_any_reason(&mut self) {
-		if self.any_reason.is_positive() {
-			self.any_reason -= 1;
-		}
+	pub fn remove(&mut self) {
+		self.count = self.count.saturating_sub(1);
 	}
-	pub fn clear_any_reasons(&mut self) {
-		self.any_reason = 0;
+	pub fn clear(&mut self) {
+		self.count = 0;
 	}
-	pub fn are_there_any_reasons(&self) -> bool {
-		self.any_reason.is_positive()
+	pub fn any(&self) -> bool {
+		self.count != 0
 	}
 }
 
 impl<T: PartialEq> ReasonToUnique<T> {
-	pub fn add_unique_reason(&mut self, unique_reason: T) {
-		self.unique_reason.push(unique_reason);
-	}
-	pub fn remove_unique_reason(&mut self, unique_reason: T) {
-		self.unique_reason.swap_remove(
-			self.unique_reason
-				.iter()
-				.position(|reason| reason == &unique_reason)
-				.unwrap(),
-		);
+	pub fn add(&mut self, reason: T) -> bool {
+		if self.reasons.contains(&reason) {
+			return false;
+		}
+		self.reasons.push(reason);
+		true
 	}
 
-	pub fn clear_unique_reasons(&mut self) {
-		self.unique_reason.clear();
+	pub fn remove(&mut self, reason: &T) -> bool {
+		match self.reasons.iter().position(|r| r == reason) {
+			Some(pos) => {
+				self.reasons.swap_remove(pos);
+				true
+			}
+			None => false,
+		}
 	}
-	pub fn are_there_unique_reasons(&self) -> bool {
-		!self.unique_reason.is_empty()
+
+	pub fn clear(&mut self) {
+		self.reasons.clear();
+	}
+	pub fn any(&self) -> bool {
+		!self.reasons.is_empty()
 	}
 }
 
 impl<T: PartialEq> ReasonToFull<T> {
-	pub fn clear_all_reasons(&mut self) {
-		self.reason_to_any.clear_any_reasons();
-		self.reason_to_unique.clear_unique_reasons();
+	pub fn clear(&mut self) {
+		self.any.clear();
+		self.unique.clear();
 	}
 
-	pub fn are_there_reasons(&self) -> bool {
-		self.reason_to_any.are_there_any_reasons()
-			&& self.reason_to_unique.are_there_unique_reasons()
+	pub fn any_reasons(&self) -> bool {
+		self.any.any() || self.unique.any()
 	}
 }
